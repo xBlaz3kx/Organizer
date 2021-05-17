@@ -7,5 +7,5 @@ import org.bson.codecs.pojo.annotations.BsonId
 @MongoEntity(collection = "devices")
 data class LEDController(
     @BsonId val deviceId: String,
-    var racksControlled: ArrayList<String> = arrayListOf() //IDs of racks that will have a device with LEDs
+    var shelvesControlled: ArrayList<String> = arrayListOf() //IDs of shelves that will have a device with LEDs
 ) : PanacheMongoEntityBase()

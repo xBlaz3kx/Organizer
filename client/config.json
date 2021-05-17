@@ -1,15 +1,13 @@
 {
   "info": {
+    "mqtt_server_ip": "192.168.1.10",
     "device_id": 123,
-    "sector_id": 123,
-    "controlling_racks": [
-      "id_of_rack_controlled_by_pi"
-    ]
+    "sector_id": 123
   },
   "topics": [
-    "/device/{device_id}/requestDeviceRacks/",
-    "/device/{device_id}/deviceRacks",
-    "/sector/{sector_id}/rack/{rack_id}/indicateLocation",
-    "/sector/{sector_id}/rack/{rack_id}/indicateEmpty"
+    "/devices/requestDeviceShelves/",
+    "/device/{device_id}/deviceShelves",
+    "/sector/{sector_id}/rack/{rack_id}/shelf/{shelf_id}/indicateLocation",
+    "/sector/{sector_id}/rack/{rack_id}/shelf/{shelf_id}/indicateEmpty"
   ]
 }
