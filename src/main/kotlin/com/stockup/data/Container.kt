@@ -1,7 +1,11 @@
 package com.stockup.data
 
+import io.quarkus.mongodb.panache.MongoEntity
+import org.bson.types.ObjectId
+
+@MongoEntity(collection = "containers")
 data class Container(
-    val ID: String,
+    val ID: ObjectId,
     var length: Float,
     var width: Float,
     var height: Float,

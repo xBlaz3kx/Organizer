@@ -1,10 +1,14 @@
 package com.stockup.data
 
+import io.quarkus.mongodb.panache.MongoEntity
+import org.bson.types.ObjectId
+
+@MongoEntity(collection = "racks")
 data class Rack(
-    val ID: String,
+    val ID: ObjectId,
     var length: Float,
     var width: Float,
     var height: Float,
-    var shelves: ArrayList<Shelf> = arrayListOf(), // shelves from bottom to top
-    var maxShelves: Int,
+    var shelves: ArrayList<Shelf> = arrayListOf(), //ID of shelves, added from bottom to top
+    var maxShelves: Int // Max shelves per rack
 )

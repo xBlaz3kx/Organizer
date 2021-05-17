@@ -4,16 +4,14 @@ import com.stockup.data.Rack
 
 class SectorService {
 
-    fun addSector() {
+    fun addSector() {}
 
-    }
+    fun deleteSector(sectorID: String) {}
 
-    fun addRackToSector(sectorID: String, rack: Rack) {
+    fun addRackToSector(sectorID: String, rack: Rack) {}
 
-    }
+    fun getRacksInSector(sectorID: String) {}
 
-    fun getRacks(sectorID: String) {
-
-    }
+    fun getDevicesInSector(sectorID: String) {}
 
 }
