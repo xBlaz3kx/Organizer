@@ -1,0 +1,15 @@
+{
+  "info": {
+    "device_id": 123,
+    "sector_id": 123,
+    "controlling_racks": [
+      "id_of_rack_controlled_by_pi"
+    ]
+  },
+  "topics": [
+    "/device/{device_id}/requestDeviceRacks/",
+    "/device/{device_id}/deviceRacks",
+    "/sector/{sector_id}/rack/{rack_id}/indicateLocation",
+    "/sector/{sector_id}/rack/{rack_id}/indicateEmpty"
+  ]
+}
