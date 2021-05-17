@@ -1,0 +1,102 @@
+version: 3.0
+services:
+  organizer:
+    build:
+      dockerfile: /src/main/docker/Dockerfile.jvm
+      context: .
+    depends_on:
+      - mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.organizer.rule=Host(`organizer.stock.up`)"
+      - "traefik.http.routers.organizer.entrypoints=web"
+  mongo:
+    image: mongo:4.4.1
+    volumes:
+      - dbdata:/var/lib/mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mongo-express.rule=Host(`mongodb.stock.up`)"
+      - "traefik.http.routers.mongo-express.entrypoints=web"
+  traefik:
+    image: "traefik:v2.3"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: "admin"
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      GF_HTTP_ADDR: "192.168.1.10"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.stock.up`)"
+      - "traefik.http.routers.grafana.entrypoints=web"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    volumes:
+      - grafana_logs/:/var/log/grafana
+      - grafana_data/:/var/lib/grafana
+      - grafana_home/:/usr/share/granana
+  prometheus:
+    image: prom/prometheus:v2.21.0
+    ports:
+      - "9000:9090"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.stock.up`)"
+      - "traefik.http.routers.prometheus.entrypoints=web"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9000"
+    volumes:
+      - prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+  emqx:
+    image: emqx/emqx:v4.0.0
+    environment:
+      - "EMQX_NAME=emqx"
+      - "EMQX_HOST=node1.emqx.io"
+      - "EMQX_CLUSTER__DISCOVERY=static"
+      - "EMQX_CLUSTER__STATIC__SEEDS=emqx@node1.emqx.io, emqx@node2.emqx.io"
+    volumes:
+    - emqx_data/:/opt/emqx/data
+    - emqx_data/etc/:/opt/emqx/etc
+    - emqx_data/logs/:/opt/emqx/log
+    networks:
+      emqx-bridge:
+        aliases:
+          - node1.emqx.io
+volumes:
+  dbdata:
+  grafana_logs:
+  grafana_data:
+  grafana_home:
+  prometheus:
+  prometheus-data:
+  emqx_data:
+networks:
+  emqx-bridge:
+    driver: bridge
