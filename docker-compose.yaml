@@ -12,6 +12,12 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.organizer.rule=Host(`organizer.stock.up`)"
       - "traefik.http.routers.organizer.entrypoints=web"
+      - "traefik.http.services.grafana.organizer.server.port=8082"
+    ports:
+      - "8082:80"
+    networks:
+      organizer:
+        - ipv4_address: 172.16.0.10
   mongo:
     image: mongo:4.4.1
     restart: on-failure
@@ -22,11 +28,14 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     ports:
       - 27017:27017
+    networks:
+      organizer:
+        - ipv4_address: 172.16.0.11
   mongo-express:
     image: mongo-express
     restart: always
     ports:
-      - 8081:8081
+      - "8081:8081"
     depends_on:
       - mongo
     environment:
@@ -36,19 +45,27 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.mongo-express.rule=Host(`mongodb.stock.up`)"
       - "traefik.http.routers.mongo-express.entrypoints=web"
+      - "traefik.http.services.mongo-express.server.port=8081"
+    networks:
+      organizer:
+        - ipv4_address: 172.16.0.12
   traefik:
-    image: "traefik:v2.3"
+    image: "traefik:v2.4"
     command:
       #- "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web-secure.address=:443"
     ports:
       - "80:80"
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      organizer:
+        - ipv4_address: 172.16.0.1
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -66,8 +83,12 @@ services:
       - grafana_logs/:/var/log/grafana
       - grafana_data/:/var/lib/grafana
       - grafana_home/:/usr/share/granana
+    networks:
+      organizer:
+        - ipv4_address: 172.16.0.13
   prometheus:
     image: prom/prometheus:v2.21.0
+    restart: always
     ports:
       - "9000:9090"
     labels:
@@ -81,8 +102,12 @@ services:
     command:
       - "--web.enable-lifecycle"
       - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      organizer:
+        - ipv4_address: 172.16.0.14
   emqx:
     image: emqx/emqx:v4.0.0
+    restart: always
     environment:
       - "EMQX_NAME=emqx"
       - "EMQX_HOST=node1.emqx.io"
@@ -93,6 +118,8 @@ services:
       - emqx_data/etc/:/opt/emqx/etc
       - emqx_data/logs/:/opt/emqx/log
     networks:
+      organizer:
+        - ipv4_address: 172.16.0.2
       emqx-bridge:
         aliases:
           - node1.emqx.io
@@ -106,4 +133,6 @@ volumes:
   emqx_data:
 networks:
   emqx-bridge:
+    driver: bridge
+  organizer:
     driver: bridge
