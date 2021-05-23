@@ -1,56 +1,49 @@
 package com.stockup.api.rest
 
-import com.stockup.services.DeviceService
-import com.stockup.services.ItemService
+import com.stockup.services.ContainerService
 import javax.enterprise.inject.Default
 import javax.inject.Inject
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
-@Path("/item")
-class ItemResource {
+@Path("/container")
+class ContainerResource {
 
     @Inject
     @field: Default
-    lateinit var itemService: ItemService
+    lateinit var containerService: ContainerService
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    fun getItems() {
+    fun getContainers() {
 
     }
 
     @Path("/{id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    fun getItem() {
-
-    }
-
-    @Path("/find-by-barcode")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    fun findByBarcode() {
-
-    }
-
-    @Path("/find")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    fun findItem() {
+    fun getContainer() {
 
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    fun addItem() {
+    fun addContainer() {
+
+    }
+
+    @Path("/{id}/add-to-shelf")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    fun addToShelf() {
 
     }
 
     @Path("/{id}")
-    @DELETE
+    @PATCH
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    fun removeItem() {
+    fun updateItemStock() {
 
     }
 }
