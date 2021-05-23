@@ -1,10 +1,12 @@
 package com.stockup.mqtt
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.quarkus.runtime.Startup
 import org.eclipse.microprofile.config.inject.ConfigProperty
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.eclipse.paho.client.mqttv3.*
 import javax.enterprise.context.ApplicationScoped
 
 @Startup
@@ -12,21 +14,49 @@ import javax.enterprise.context.ApplicationScoped
 class MQTTPublisher {
 
     @ConfigProperty(name = "mqtt.serveruri")
-    final val serverURI: String = ""
+    private val serverURI: String = ""
 
     @ConfigProperty(name = "mqtt.clientid")
-    final val clientID: String = ""
+    private val clientID: String = ""
+
+    @ConfigProperty(name = "mqtt.color.indicate.default")
+    private val indicateDefaultColor: Int = 0
+
+    @ConfigProperty(name = "mqtt.color.indicate.empty")
+    private val indicateEmptyColor: Int = 0
 
     private val client: MqttClient = MqttClient(serverURI, clientID)
     private val indicateContainerLocationTopic: String = "indicateLocation"
     private val indicateContainerEmptyTopic: String = "indicateEmpty"
+    private val deviceShelfRequestTopic: String = "/devices/requestDeviceShelves"
+
+    val showTypeBlink: String = "blink"
+    val showTypeBlinkInterval: String = "blinkInterval"
+    val showTypeStatic: String = "static"
+    val showTypeOff: String = "off"
 
     init {
+        ObjectMapper().registerKotlinModule()
         try {
             val connOpts = MqttConnectOptions()
             connOpts.isCleanSession = true
             client.connect(connOpts)
-            client.subscribe("/devices/requestDeviceShelves")
+            client.subscribe(deviceShelfRequestTopic)
+            client.setCallback(object : MqttCallback {
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    if (topic!!.toString() == deviceShelfRequestTopic) {
+                        val map: Map<String, Any> = jacksonObjectMapper().readValue(message.toString())
+                        val deviceID: String = map["deviceID"].toString()
+                        client.publish("/device/${deviceID}/deviceShelves", MqttMessage())
+                    }
+                }
+
+                override fun connectionLost(cause: Throwable?) {
+                }
+
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                }
+            })
         } catch (ex: Exception) {
         }
     }
@@ -38,7 +68,7 @@ class MQTTPublisher {
         containerIndex: Int,
         blinkDuration: Int
     ) {
-        return indicateContainerLocation(sectorId, rackId, shelf_id, containerIndex, "blink", blinkDuration)
+        return indicateContainerLocation(sectorId, rackId, shelf_id, containerIndex, showTypeBlink, blinkDuration)
     }
 
     fun indicateContainerLocationBlinkingIntervals(
@@ -48,7 +78,14 @@ class MQTTPublisher {
         containerIndex: Int,
         blinkInterval: Int
     ) {
-        return indicateContainerLocation(sectorId, rackId, shelf_id, containerIndex, "blink_interval", blinkInterval)
+        return indicateContainerLocation(
+            sectorId,
+            rackId,
+            shelf_id,
+            containerIndex,
+            showTypeBlinkInterval,
+            blinkInterval
+        )
     }
 
     fun indicateContainerLocationStatic(
@@ -61,8 +98,9 @@ class MQTTPublisher {
         return indicateAtTopic(
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerLocationTopic}",
             containerIndex,
-            "static",
-            showDuration
+            showTypeStatic,
+            showDuration,
+            indicateDefaultColor
         )
     }
 
@@ -71,14 +109,15 @@ class MQTTPublisher {
         rackId: String,
         shelf_id: String,
         containerIndex: Int,
-        showType: String? = "static",
+        showType: String? = showTypeStatic,
         showDuration: Int? = -1
     ) {
         return indicateAtTopic(
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerLocationTopic}",
             containerIndex,
             showType,
-            showDuration
+            showDuration,
+            indicateDefaultColor
         )
     }
 
@@ -91,7 +130,7 @@ class MQTTPublisher {
         return indicateAtTopic(
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerLocationTopic}",
             containerIndex,
-            "off",
+            showTypeOff,
             -1
         )
     }
@@ -108,18 +147,25 @@ class MQTTPublisher {
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerEmptyTopic}",
             containerIndex,
             showType,
-            showDuration
+            showDuration,
+            indicateEmptyColor
         )
     }
 
     fun indicateAtTopic(
         topic: String,
         containerIndex: Int,
-        showType: String? = "blink", //blink = blink once; blink_interval = blink in intervals till it is turned off; static = the LED stays on till it is turned off
-        showDuration: Int? = -1 // -1 means turned on till turned off, 0 and beyond is either interval or duration
+        showType: String? = showTypeBlink, //blink = blink once; blink_interval = blink in intervals till it is turned off; static = the LED stays on till it is turned off
+        showDuration: Int? = -1, // -1 means turned on till turned off, 0 and beyond is either interval or duration
+        color: Int? = 0
     ) {
+        val messageStructure: HashMap<String, Any> = hashMapOf()
+        messageStructure["container"] = containerIndex
+        messageStructure["showType"] = showType!!
+        messageStructure["showDuration"] = showDuration!!
+        messageStructure["color"] = color!!
         val message =
-            MqttMessage("{container: ${containerIndex}, showType: ${showType}, showDuration: ${showDuration}, color: { r:${""}, g:${""}, b:${""} }}".encodeToByteArray())
+            MqttMessage(jacksonObjectMapper().writeValueAsBytes(messageStructure))
         message.qos = 2
         client.publish(topic, message)
     }
