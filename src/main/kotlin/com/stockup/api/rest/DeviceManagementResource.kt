@@ -13,6 +13,7 @@ class DeviceManagementResource {
     @field: Default
     lateinit var deviceService: DeviceService
 
+    @Path("/")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     fun getDevices() {
@@ -26,8 +27,10 @@ class DeviceManagementResource {
 
     }
 
+    @Path("/")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addDevice() {
 
     }
@@ -47,7 +50,6 @@ class DeviceManagementResource {
     fun addShelvesToDevice() {
 
     }
-
 
     @Path("/{id}/reassign")
     @POST

@@ -1,6 +1,5 @@
 package com.stockup.api.rest
 
-import com.stockup.services.DeviceService
 import com.stockup.services.ItemService
 import javax.enterprise.inject.Default
 import javax.inject.Inject
@@ -14,6 +13,7 @@ class ItemResource {
     @field: Default
     lateinit var itemService: ItemService
 
+    @Path("/")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     fun getItems() {
@@ -27,22 +27,24 @@ class ItemResource {
 
     }
 
-    @Path("/find-by-barcode")
+    @Path("/find-by-barcode/{barcode}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     fun findByBarcode() {
 
     }
 
-    @Path("/find")
+    @Path("/find/{id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     fun findItem() {
 
     }
 
+    @Path("/")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addItem() {
 
     }

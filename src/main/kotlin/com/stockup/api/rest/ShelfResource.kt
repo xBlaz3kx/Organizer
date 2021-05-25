@@ -28,6 +28,7 @@ class ShelfResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addShelf() {
 
     }
@@ -35,6 +36,7 @@ class ShelfResource {
     @Path("/{id}/add-containers")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addContainersToShelf() {
 
     }
@@ -44,6 +46,7 @@ class ShelfResource {
     @PUT
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addDeviceToShelf() {
 
     }

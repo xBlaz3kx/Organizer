@@ -33,6 +33,7 @@ class SectorResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addSector() {
 
     }
@@ -49,9 +50,8 @@ class SectorResource {
     @PATCH
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addRackToSector() {
 
     }
-
-
 }

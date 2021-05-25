@@ -26,8 +26,10 @@ class RackResource {
 
     }
 
+    @Path("/")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addRack() {
 
     }
@@ -37,6 +39,7 @@ class RackResource {
     @PUT
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addShelvesToRack() {
 
     }

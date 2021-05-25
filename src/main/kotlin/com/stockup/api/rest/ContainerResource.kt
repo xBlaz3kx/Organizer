@@ -26,8 +26,10 @@ class ContainerResource {
 
     }
 
+    @Path("/")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addContainer() {
 
     }
@@ -35,6 +37,7 @@ class ContainerResource {
     @Path("/{id}/add-to-shelf")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun addToShelf() {
 
     }
@@ -43,6 +46,7 @@ class ContainerResource {
     @PATCH
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     fun updateItemStock() {
 
     }
