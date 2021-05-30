@@ -19,11 +19,14 @@ class MQTTPublisher {
     @ConfigProperty(name = "mqtt.clientid")
     private val clientID: String = ""
 
-    @ConfigProperty(name = "mqtt.color.indicate.default")
+    @ConfigProperty(name = "mqtt.indicate.color.default")
     private val indicateDefaultColor: Int = 0
 
-    @ConfigProperty(name = "mqtt.color.indicate.empty")
+    @ConfigProperty(name = "mqtt.indicate.color.empty")
     private val indicateEmptyColor: Int = 0
+
+    @ConfigProperty(name = "mqtt.indicate.type.default")
+    private val indicateTypeDefault: Int = 0
 
     private val client: MqttClient = MqttClient(serverURI, clientID)
     private val indicateContainerLocationTopic: String = "indicateLocation"
@@ -167,6 +170,9 @@ class MQTTPublisher {
         val message =
             MqttMessage(jacksonObjectMapper().writeValueAsBytes(messageStructure))
         message.qos = 2
-        client.publish(topic, message)
+        try {
+            client.publish(topic, message)
+        } catch (exception: MqttPersistenceException) {
+        }
     }
 }

@@ -7,7 +7,6 @@ services:
     restart: on-failure
     depends_on:
       - mongo
-      - emqx
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.organizer.rule=Host(`organizer.stock.up`)"
