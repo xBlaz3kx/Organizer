@@ -1,15 +1,25 @@
 package com.stockup.services
 
+import com.stockup.data.Shelf
+import com.stockup.repositories.SectorRepository
+import javax.enterprise.context.ApplicationScoped
+import javax.enterprise.inject.Default
+import javax.inject.Inject
+
+
+@ApplicationScoped
 class ShelfService {
 
-    fun getShelf() {}
+    @Inject
+    @field: Default
+    lateinit var sectorRepository: SectorRepository
 
-    fun getShelvesFromRack() {}
+    fun getShelf(shelfId: String) {}
 
-    fun getShelvesFromSector() {}
+    fun addShelf(shelf: Shelf) {}
 
-    fun addShelfToRack() {}
+    fun addShelfToRack(shelfId: String, rackId: String) {}
 
-    fun deleteShelveFromRack() {}
+    fun deleteShelveFromRack(shelfId: String) {}
 
 }

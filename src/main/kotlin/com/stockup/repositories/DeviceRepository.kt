@@ -1,8 +1,10 @@
 package com.stockup.repositories
 
-import com.stockup.data.LEDController
+import com.stockup.data.Device
 import io.quarkus.mongodb.panache.kotlin.reactive.ReactivePanacheMongoRepository
+import javax.enterprise.context.ApplicationScoped
 
-class DeviceRepository : ReactivePanacheMongoRepository<LEDController> {
+@ApplicationScoped
+class DeviceRepository : ReactivePanacheMongoRepository<Device> {
 
 }
