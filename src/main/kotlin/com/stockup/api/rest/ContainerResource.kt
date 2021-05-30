@@ -42,6 +42,15 @@ class ContainerResource {
 
     }
 
+    @Path("/{id}/move-to-shelf")
+    @POST
+    @PATCH
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    fun moveToShelf() {
+    }
+
     @Path("/{id}")
     @PATCH
     @PUT

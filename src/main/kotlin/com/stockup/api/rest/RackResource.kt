@@ -43,4 +43,14 @@ class RackResource {
     fun addShelvesToRack() {
 
     }
+
+    @Path("/{id}/remove-shelves")
+    @POST
+    @PUT
+    @PATCH
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    fun removeShelvesFromRack() {
+
+    }
 }

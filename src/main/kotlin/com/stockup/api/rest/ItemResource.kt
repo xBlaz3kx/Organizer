@@ -17,14 +17,12 @@ class ItemResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     fun getItems() {
-
     }
 
     @Path("/{id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     fun getItem() {
-
     }
 
     @Path("/find-by-barcode/{barcode}")
@@ -41,6 +39,7 @@ class ItemResource {
 
     }
 
+
     @Path("/")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -52,7 +51,7 @@ class ItemResource {
     @Path("/{id}")
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    fun removeItem() {
+    fun deleteItem() {
 
     }
 }

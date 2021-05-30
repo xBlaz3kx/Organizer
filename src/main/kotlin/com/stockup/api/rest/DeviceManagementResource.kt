@@ -51,12 +51,12 @@ class DeviceManagementResource {
 
     }
 
-    @Path("/{id}/reassign")
+    @Path("/{id}/remove-shelves")
     @POST
     @PUT
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)
-    fun reassignToShelf() {
+    fun removeShelfFromDevice() {
 
     }
 

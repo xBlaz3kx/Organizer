@@ -1,7 +1,6 @@
 package com.stockup.api.rest
 
 import com.stockup.services.SectorService
-import io.smallrye.mutiny.Uni
 import javax.enterprise.inject.Default
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -13,10 +12,6 @@ class SectorResource {
     @Inject
     @field: Default
     lateinit var sectorService: SectorService
-
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    fun hello(): Uni<Void> = Uni.createFrom().voidItem()
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -45,13 +40,32 @@ class SectorResource {
 
     }
 
-    @Path("/{id}/add-rack")
+    @Path("/{id}/add-racks")
     @PUT
     @PATCH
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    fun addRackToSector() {
+    fun addRacksToSector() {
+
+    }
+
+    @Path("/{id}/add-devices")
+    @PUT
+    @PATCH
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    fun addDevicesToSector() {
+
+    }
+
+    @Path("/{id}/remove-devices")
+    @PUT
+    @PATCH
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    fun removeDevicesFromSector() {
 
     }
 }
