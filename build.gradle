@@ -25,7 +25,8 @@ dependencies {
     implementation 'io.quarkus:quarkus-mongodb-panache-kotlin'
     implementation 'io.quarkus:quarkus-logging-sentry'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-    implementation 'com.google.zxing:zxing-parent:3.4.1'
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation "com.soywiz.korlibs.korim:korim:2.1.1"
     implementation 'io.quarkus:quarkus-arc'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
