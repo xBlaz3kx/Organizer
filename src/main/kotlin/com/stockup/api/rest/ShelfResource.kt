@@ -1,6 +1,9 @@
 package com.stockup.api.rest
 
+import com.stockup.data.Shelf
 import com.stockup.services.ShelfService
+import io.smallrye.mutiny.Multi
+import io.smallrye.mutiny.Uni
 import javax.enterprise.inject.Default
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -15,22 +18,22 @@ class ShelfResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    fun getShelves() {
-
+    fun getShelves(): Multi<Shelf> {
+        return shelfService.getShelves()
     }
 
     @Path("/{id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    fun getShelf() {
-
+    fun getShelf(@PathParam("id") id: String): Uni<Shelf?> {
+        return shelfService.getShelf(id)
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    fun addShelf() {
-
+    fun addShelf(shelf: Shelf): Uni<Void> {
+        return shelfService.addShelf(shelf)
     }
 
     @Path("/{id}/add-containers")

@@ -1,8 +1,9 @@
 package com.stockup.services
 
 import com.stockup.data.Item
-import com.stockup.mqtt.MQTTPublisher
 import com.stockup.repositories.ItemRepository
+import io.smallrye.mutiny.Multi
+import io.smallrye.mutiny.Uni
 import javax.enterprise.context.ApplicationScoped
 import javax.enterprise.inject.Default
 import javax.inject.Inject
@@ -14,15 +15,27 @@ class ItemService {
     @field: Default
     lateinit var itemRepository: ItemRepository
 
-    fun getItem(itemID: String) {}
+    fun getItem(itemId: String): Uni<Item?> {
+        return itemRepository.getItem(itemId)
+    }
 
-    fun getItems() {}
+    fun getItems(): Multi<Item> {
+        return itemRepository.getItem()
+    }
 
-    fun findByBarcode(itemID: String) {}
+    fun findByBarcode(barcode: String): Multi<Item> {
+        return itemRepository.find("barcode", barcode).stream()
+    }
 
-    fun addItem(item: Item) {}
+    fun addItem(item: Item): Uni<Void> {
+        return itemRepository.addItem(item)
+    }
 
-    fun addItemToContainer(itemID: String, containerId: String) {}
+    fun addItemToContainer(itemId: String, containerId: String): Uni<Void?> {
+        return Uni.createFrom().nullItem()
+    }
 
-    fun deleteItem(itemID: String) {}
+    fun deleteItem(itemId: String): Uni<Boolean> {
+        return itemRepository.deleteItem(itemId)
+    }
 }

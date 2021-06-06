@@ -2,7 +2,6 @@ package com.stockup.mqtt
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.quarkus.runtime.Startup
 import org.eclipse.microprofile.config.inject.ConfigProperty
@@ -13,10 +12,10 @@ import javax.enterprise.context.ApplicationScoped
 @ApplicationScoped
 class MQTTPublisher {
 
-    @ConfigProperty(name = "mqtt.serveruri")
+    @ConfigProperty(name = "mqtt.client.brokeruri")
     private val serverURI: String = ""
 
-    @ConfigProperty(name = "mqtt.clientid")
+    @ConfigProperty(name = "mqtt.client.id")
     private val clientID: String = ""
 
     @ConfigProperty(name = "mqtt.indicate.color.default")
@@ -31,7 +30,7 @@ class MQTTPublisher {
     private val client: MqttClient = MqttClient(serverURI, clientID)
     private val indicateContainerLocationTopic: String = "indicateLocation"
     private val indicateContainerEmptyTopic: String = "indicateEmpty"
-    private val deviceShelfRequestTopic: String = "/devices/requestDeviceShelves"
+    final val deviceShelfRequestTopic: String = "/devices/requestDeviceShelves"
 
     val showTypeBlink: String = "blink"
     val showTypeBlinkInterval: String = "blinkInterval"
@@ -45,46 +44,39 @@ class MQTTPublisher {
             connOpts.isCleanSession = true
             client.connect(connOpts)
             client.subscribe(deviceShelfRequestTopic)
-            client.setCallback(object : MqttCallback {
-                override fun messageArrived(topic: String?, message: MqttMessage?) {
-                    if (topic!!.toString() == deviceShelfRequestTopic) {
-                        val map: Map<String, Any> = jacksonObjectMapper().readValue(message.toString())
-                        val deviceID: String = map["deviceID"].toString()
-                        client.publish("/device/${deviceID}/deviceShelves", MqttMessage())
-                    }
-                }
-
-                override fun connectionLost(cause: Throwable?) {
-                }
-
-                override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                }
-            })
         } catch (ex: Exception) {
         }
+    }
+
+    fun sendDeviceShelves(deviceID: String, message: MqttMessage) {
+        client.publish("/device/${deviceID}/deviceShelves", message)
+    }
+
+    fun setCallback(callback: MqttCallback) {
+        client.setCallback(callback)
     }
 
     fun indicateContainerLocationWithBlink(
         sectorId: String,
         rackId: String,
-        shelf_id: String,
+        shelfId: String,
         containerIndex: Int,
         blinkDuration: Int
     ) {
-        return indicateContainerLocation(sectorId, rackId, shelf_id, containerIndex, showTypeBlink, blinkDuration)
+        return indicateContainerLocation(sectorId, rackId, shelfId, containerIndex, showTypeBlink, blinkDuration)
     }
 
     fun indicateContainerLocationBlinkingIntervals(
         sectorId: String,
         rackId: String,
-        shelf_id: String,
+        shelfId: String,
         containerIndex: Int,
         blinkInterval: Int
     ) {
         return indicateContainerLocation(
             sectorId,
             rackId,
-            shelf_id,
+            shelfId,
             containerIndex,
             showTypeBlinkInterval,
             blinkInterval
@@ -94,12 +86,12 @@ class MQTTPublisher {
     fun indicateContainerLocationStatic(
         sectorId: String,
         rackId: String,
-        shelf_id: String,
+        shelfId: String,
         containerIndex: Int,
         showDuration: Int
     ) {
         return indicateAtTopic(
-            "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerLocationTopic}",
+            "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerLocationTopic}",
             containerIndex,
             showTypeStatic,
             showDuration,
@@ -110,13 +102,13 @@ class MQTTPublisher {
     fun indicateContainerLocation(
         sectorId: String,
         rackId: String,
-        shelf_id: String,
+        shelfId: String,
         containerIndex: Int,
         showType: String? = showTypeStatic,
         showDuration: Int? = -1
     ) {
         return indicateAtTopic(
-            "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerLocationTopic}",
+            "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerLocationTopic}",
             containerIndex,
             showType,
             showDuration,
@@ -127,11 +119,11 @@ class MQTTPublisher {
     fun turnOffIndicator(
         sectorId: String,
         rackId: String,
-        shelf_id: String,
+        shelfId: String,
         containerIndex: Int,
     ) {
         return indicateAtTopic(
-            "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerLocationTopic}",
+            "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerLocationTopic}",
             containerIndex,
             showTypeOff,
             -1
@@ -141,13 +133,13 @@ class MQTTPublisher {
     fun indicateContainerEmpty(
         sectorId: String,
         rackId: String,
-        shelf_id: String,
+        shelfId: String,
         containerIndex: Int,
         showType: String?,
         showDuration: Int?
     ) {
         return indicateAtTopic(
-            "/sector/${sectorId}/rack/${rackId}/shelf/${shelf_id}/${indicateContainerEmptyTopic}",
+            "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerEmptyTopic}",
             containerIndex,
             showType,
             showDuration,
