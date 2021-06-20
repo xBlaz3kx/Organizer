@@ -25,17 +25,20 @@ class MQTTPublisher {
     private val indicateEmptyColor: Int = 0
 
     @ConfigProperty(name = "mqtt.indicate.type.default")
-    private val indicateTypeDefault: Int = 0
+    private val indicateTypeDefault: DisplayType = DisplayType.BLINK_INTERVAL
 
     private val client: MqttClient = MqttClient(serverURI, clientID)
     private val indicateContainerLocationTopic: String = "indicateLocation"
     private val indicateContainerEmptyTopic: String = "indicateEmpty"
     final val deviceShelfRequestTopic: String = "/devices/requestDeviceShelves"
 
-    val showTypeBlink: String = "blink"
-    val showTypeBlinkInterval: String = "blinkInterval"
-    val showTypeStatic: String = "static"
-    val showTypeOff: String = "off"
+
+    enum class DisplayType(val type: String) {
+        BLINK("blink"),
+        BLINK_INTERVAL("blinkInterval"),
+        STATIC("static"),
+        OFF("off")
+    }
 
     init {
         ObjectMapper().registerKotlinModule()
@@ -63,7 +66,7 @@ class MQTTPublisher {
         containerIndex: Int,
         blinkDuration: Int
     ) {
-        return indicateContainerLocation(sectorId, rackId, shelfId, containerIndex, showTypeBlink, blinkDuration)
+        return indicateContainerLocation(sectorId, rackId, shelfId, containerIndex, DisplayType.BLINK, blinkDuration)
     }
 
     fun indicateContainerLocationBlinkingIntervals(
@@ -78,7 +81,7 @@ class MQTTPublisher {
             rackId,
             shelfId,
             containerIndex,
-            showTypeBlinkInterval,
+            DisplayType.BLINK_INTERVAL,
             blinkInterval
         )
     }
@@ -93,7 +96,7 @@ class MQTTPublisher {
         return indicateAtTopic(
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerLocationTopic}",
             containerIndex,
-            showTypeStatic,
+            DisplayType.STATIC,
             showDuration,
             indicateDefaultColor
         )
@@ -104,13 +107,13 @@ class MQTTPublisher {
         rackId: String,
         shelfId: String,
         containerIndex: Int,
-        showType: String? = showTypeStatic,
+        displayType: DisplayType,
         showDuration: Int? = -1
     ) {
         return indicateAtTopic(
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerLocationTopic}",
             containerIndex,
-            showType,
+            displayType,
             showDuration,
             indicateDefaultColor
         )
@@ -125,7 +128,7 @@ class MQTTPublisher {
         return indicateAtTopic(
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerLocationTopic}",
             containerIndex,
-            showTypeOff,
+            DisplayType.OFF,
             -1
         )
     }
@@ -135,14 +138,14 @@ class MQTTPublisher {
         rackId: String,
         shelfId: String,
         containerIndex: Int,
-        showType: String?,
-        showDuration: Int?
+        displayType: DisplayType,
+        displayDuration: Int?
     ) {
         return indicateAtTopic(
             "/sector/${sectorId}/rack/${rackId}/shelf/${shelfId}/${indicateContainerEmptyTopic}",
             containerIndex,
-            showType,
-            showDuration,
+            displayType,
+            displayDuration,
             indicateEmptyColor
         )
     }
@@ -150,14 +153,14 @@ class MQTTPublisher {
     fun indicateAtTopic(
         topic: String,
         containerIndex: Int,
-        showType: String? = showTypeBlink, //blink = blink once; blink_interval = blink in intervals till it is turned off; static = the LED stays on till it is turned off
+        displayType: DisplayType = MQTTPublisher.DisplayType.BLINK, //blink = blink once; blinkInterval = blink in intervals till it is turned off; static = the LED stays on till it is turned off
         showDuration: Int? = -1, // -1 means turned on till turned off, 0 and beyond is either interval or duration
         color: Int? = 0
     ) {
         val messageStructure: HashMap<String, Any> = hashMapOf()
         messageStructure["container"] = containerIndex
-        messageStructure["showType"] = showType!!
-        messageStructure["showDuration"] = showDuration!!
+        messageStructure["displayType"] = displayType
+        messageStructure["displayDuration"] = showDuration!!
         messageStructure["color"] = color!!
         val message =
             MqttMessage(jacksonObjectMapper().writeValueAsBytes(messageStructure))

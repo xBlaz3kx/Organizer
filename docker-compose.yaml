@@ -11,7 +11,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.organizer.rule=Host(`organizer.stock.up`)"
       - "traefik.http.routers.organizer.entrypoints=web"
-      - "traefik.http.services.grafana.organizer.server.port=8082"
+      - "traefik.http.services.organizer.loadbalancer.server.port=80"
     ports:
       - "8082:80"
     networks:
@@ -44,22 +44,42 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.mongo-express.rule=Host(`mongodb.stock.up`)"
       - "traefik.http.routers.mongo-express.entrypoints=web"
-      - "traefik.http.services.mongo-express.server.port=8081"
+      - "traefik.http.services.mongo-express.loadbalancer.server.port=8081"
     networks:
       organizer:
         - ipv4_address: 172.16.0.12
   traefik:
     image: "traefik:v2.4"
     command:
-      #- "--log.level=DEBUG"
+      - "--log.level=DEBUG"
+      # Set to false in production and add authentication
       - "--api.insecure=true"
+      - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web-secure.address=:443"
+      - "--entryPoints.metrics.address=:8082"
+      - "--metrics.prometheus.entryPoint=metrics"
+      - "--metrics.prometheus.addServicesLabels=true"
+      - "--metrics.prometheus.addEntryPointsLabels=true"
+    labels:
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.stock.up`)"
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik-dashboard.service=api@internal
+      - traefik.http.routers.traefik-dashboard.entrypoints=web
+      - "traefik.docker.network=organizer"
+      - "traefik.enable=true"
+      #- traefik.http.middlewares.my-basic-auth.basicauth.users=traefik:$$apr1$$SnHDtk1N$$cpc7xSXXrMVnPYdF01WdC0
+      - traefik.http.services.prometheus.loadbalancer.server.port=8082
+      - traefik.http.routers.prometheus.rule=PathPrefix(`/metrics`)
+      - traefik.http.routers.prometheus.service=prometheus@internal
+      - traefik.http.routers.prometheus.entrypoints=metrics
+      #- traefik.http.routers.prometheus.middlewares=my-basic-auth
+
     ports:
       - "80:80"
-      - "8080:8080"
+      - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
@@ -72,7 +92,6 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: "admin"
       GF_SECURITY_ADMIN_PASSWORD: "admin"
-      GF_HTTP_ADDR: "192.168.1.10"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`grafana.stock.up`)"
@@ -94,10 +113,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.stock.up`)"
       - "traefik.http.routers.prometheus.entrypoints=web"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9000"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     volumes:
-      - prometheus:/etc/prometheus
-      - prometheus-data:/prometheus
+      - prometheus/:/etc/prometheus/
+      - prometheus-data:/prometheus/
     command:
       - "--web.enable-lifecycle"
       - "--config.file=/etc/prometheus/prometheus.yml"
